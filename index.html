@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#a5d957">
+  <title>Weed Whacker: The Lawn Wars</title>
+  <style>
+    :root {
+      --ink: #263d2b;
+      --green: #2f7b3b;
+      --lime: #d7f47b;
+      --cream: #fff9e9;
+      --orange: #ff9a42;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+      background: #d8f3ff;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    button { font: inherit; }
+
+    .game-shell {
+      width: min(100%, 980px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 18px 22px 26px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 18% 18%, #fff8cc 0 2%, transparent 2.2%),
+        linear-gradient(#aee5f5 0 28%, #d4f1fb 28% 42%, #8ecf69 42% 100%);
+    }
+
+    .sky-decoration {
+      position: absolute;
+      inset: 0 0 auto;
+      height: 190px;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .sun {
+      position: absolute;
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      right: 12%;
+      top: 26px;
+      background: #ffe788;
+      box-shadow: 0 0 0 12px #ffe78833, 0 0 45px #fff3a7aa;
+    }
+
+    .cloud {
+      position: absolute;
+      width: 92px;
+      height: 28px;
+      border-radius: 30px;
+      background: #ffffffc9;
+      top: 63px;
+      left: 12%;
+      filter: drop-shadow(0 5px 0 #72baca25);
+    }
+    .cloud::before, .cloud::after {
+      content: "";
+      position: absolute;
+      background: inherit;
+      border-radius: 50%;
+    }
+    .cloud::before { width: 39px; height: 39px; left: 16px; top: -19px; }
+    .cloud::after { width: 30px; height: 30px; left: 46px; top: -12px; }
+
+    .topbar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      max-width: 760px;
+      margin: 0 auto 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .85rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #387443;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      background: #f7ffe0;
+      box-shadow: 0 4px 0 #538f49;
+      font-size: 22px;
+      transform: rotate(-5deg);
+    }
+
+    .icon-button {
+      border: 0;
+      color: var(--ink);
+      background: #ffffffb8;
+      border-radius: 14px;
+      min-width: 44px;
+      height: 42px;
+      padding: 0 12px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #6da67b55;
+    }
+    .icon-button:active { transform: translateY(2px); box-shadow: none; }
+
+    .screen {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 760px);
+      margin: 0 auto;
+      animation: screenIn .35s ease both;
+    }
+    @keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--cream);
+      border: 3px solid #fff;
+      border-radius: 28px;
+      padding: clamp(22px, 5vw, 44px);
+      box-shadow: 0 12px 0 #447f4c38, 0 22px 45px #284d3430;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 30px;
+      padding: 7px 12px;
+      color: #557a31;
+      background: #edf7d6;
+      font-size: .75rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 610px;
+      margin: 18px auto 8px;
+      color: #28643a;
+      font-size: clamp(2.2rem, 8vw, 4.7rem);
+      line-height: .96;
+      letter-spacing: -.055em;
+      text-shadow: 0 3px 0 #c8e89c;
+    }
+    h1 span { color: #e87934; }
+    .subtitle {
+      margin: 12px 0 23px;
+      color: #68785b;
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      font-weight: 700;
+    }
+
+    .hero-art {
+      width: min(100%, 440px);
+      height: 150px;
+      margin: 0 auto 15px;
+      position: relative;
+      border-radius: 100px 100px 32px 32px;
+      border: 5px solid #fff;
+      overflow: hidden;
+      background: linear-gradient(#a5e3fa 0 45%, #83c85b 45% 100%);
+      box-shadow: 0 6px 0 #a9cc7c;
+    }
+    .hero-fence {
+      position: absolute; inset: 44px 0 auto; height: 38px;
+      opacity: .8;
+      background: repeating-linear-gradient(90deg, #f8edc7 0 18px, transparent 18px 27px);
+      border-top: 5px solid #f8edc7; border-bottom: 5px solid #f8edc7;
+    }
+    .hero-grass {
+      position: absolute; inset: auto 0 0; height: 58px;
+      background: repeating-linear-gradient(110deg, #65ae49 0 9px, #76bc4e 9px 18px);
+    }
+    .hero-weed {
+      position: absolute; bottom: 25px; left: 50%;
+      font-size: 65px; transform: translateX(-50%);
+      filter: drop-shadow(0 5px 2px #244c3340);
+      animation: bob 1.8s ease-in-out infinite;
+    }
+    .hero-flower { position: absolute; font-size: 27px; bottom: 15px; }
+    .hero-flower.one { left: 13%; } .hero-flower.two { right: 13%; }
+    @keyframes bob { 50% { transform: translate(-50%, -8px) rotate(4deg); } }
+
+    .best-badge {
+      display: inline-flex; gap: 8px; align-items: center;
+      color: #8c5b10; background: #fff0bc;
+      padding: 9px 15px; border-radius: 30px;
+      font-weight: 900; margin-bottom: 18px;
+    }
+
+    .primary-button {
+      border: 0;
+      border-radius: 17px;
+      padding: 15px 28px;
+      color: #fff;
+      background: linear-gradient(#ffad4f, #f17b32);
+      box-shadow: 0 6px 0 #c45c26, 0 10px 20px #df7b3644;
+      font-size: 1.12rem;
+      font-weight: 1000;
+      cursor: pointer;
+      transition: transform .12s, filter .12s;
+    }
+    .primary-button:hover { filter: brightness(1.05); transform: translateY(-2px); }
+    .primary-button:active { transform: translateY(4px); box-shadow: 0 2px 0 #c45c26; }
+
+    .how-to {
+      max-width: 520px;
+      margin: 23px auto 0;
+      color: #708064;
+      font-size: .9rem;
+      line-height: 1.5;
+    }
+
+    /* Game screen */
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin: 0 0 12px;
+    }
+    .hud-box {
+      min-width: 0;
+      padding: 10px 12px;
+      border: 3px solid #fff;
+      border-radius: 17px;
+      background: #fff9e9ed;
+      box-shadow: 0 4px 0 #447f4c38;
+      text-align: center;
+    }
+    .hud-label {
+      display: block; color: #7e8d70; font-size: .66rem;
+      font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
+    }
+    .hud-value {
+      display: block; margin-top: 1px;
+      color: #28643a; font-size: clamp(1.35rem, 5vw, 2rem);
+      line-height: 1; font-weight: 1000; font-variant-numeric: tabular-nums;
+    }
+    .hud-box.timer .hud-value { color: #e27635; }
+    .hud-box.streak .hud-value { color: #7562bd; }
+
+    .yard {
+      position: relative;
+      overflow: hidden;
+      padding: 17px clamp(10px, 4vw, 28px) 25px;
+      border: 4px solid #fff;
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, #c6eff9 0 17%, transparent 17%),
+        linear-gradient(#a4d873, #77bf50 58%, #61a943);
+      box-shadow: 0 8px 0 #447f4c45, inset 0 0 35px #fff2b944;
+    }
+    .yard::before {
+      content: "";
+      position: absolute; left: 0; right: 0; top: 17%; height: 14%;
+      background:
+        repeating-linear-gradient(90deg, #f8efcf 0 22px, transparent 22px 31px);
+      border-block: 6px solid #f8efcf;
+      opacity: .9;
+    }
+    .yard::after {
+      content: "";
+      position: absolute; left: 0; right: 0; bottom: 0; height: 25%;
+      pointer-events: none;
+      background: repeating-linear-gradient(112deg, transparent 0 12px, #4d9e3b30 12px 16px);
+    }
+
+    .yard-details {
+      position: absolute; inset: 0;
+      pointer-events: none; z-index: 1;
+    }
+    .yard-details span {
+      position: absolute;
+      font-size: clamp(18px, 4vw, 29px);
+      filter: drop-shadow(0 2px 1px #365b3033);
+    }
+    .yard-details .d1 { left: 3%; top: 35%; }
+    .yard-details .d2 { right: 3%; top: 39%; }
+    .yard-details .d3 { left: 4%; bottom: 7%; }
+    .yard-details .d4 { right: 4%; bottom: 8%; }
+
+    .patch-grid {
+      position: relative; z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(10px, 3vw, 24px);
+      max-width: 570px;
+      margin: 55px auto 0;
+    }
+
+    .patch {
+      position: relative;
+      min-width: 0;
+      aspect-ratio: 1.22;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      cursor: crosshair;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+    }
+    .patch:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 50%; }
+
+    .dirt {
+      position: absolute;
+      left: 4%; right: 4%; bottom: 3%;
+      height: 49%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at 50% 35%, #ae7042, #88502f 70%, #623b29);
+      border: 5px solid #73b84f;
+      box-shadow: inset 0 5px 5px #583a2b60, 0 5px 0 #397c393d;
+      transition: transform .14s, filter .14s;
+    }
+    .patch:active .dirt { transform: scale(.96); }
+    .weed-slot {
+      position: absolute;
+      left: 0; right: 0; bottom: 21%;
+      height: 95%;
+      display: flex; align-items: flex-end; justify-content: center;
+      pointer-events: none;
+    }
+    .weed {
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      width: min(90%, 100px);
+      height: 100%;
+      transform: translateY(120%) scale(.7);
+      opacity: 0;
+      transition: transform .19s cubic-bezier(.2, 1.5, .45, 1), opacity .12s;
+      filter: drop-shadow(0 4px 2px #1e4c2835);
+      pointer-events: none;
+    }
+    .weed svg { overflow: visible; width: 100%; max-height: 100%; }
+    .patch.active .weed { opacity: 1; transform: translateY(0) scale(1); }
+    .patch.pulling .weed { transform: translateY(-135%) rotate(18deg) scale(.5); opacity: 0; transition: .2s ease-in; }
+    .patch.active .weed svg { animation: weedWiggle 1.5s ease-in-out infinite; }
+    @keyframes weedWiggle { 0%,100% { rotate: -2deg; } 50% { rotate: 2deg; } }
+
+    .weed-name {
+      position: absolute;
+      z-index: 3;
+      bottom: 7%;
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: #fffbe8;
+      color: #36573b;
+      font-size: .64rem;
+      line-height: 1.2;
+      font-weight: 1000;
+      opacity: 0;
+      white-space: nowrap;
+      transition: opacity .12s, transform .12s;
+      pointer-events: none;
+    }
+    .patch.active .weed-name { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .patch.poison .weed-name { color: #9c3e6f; background: #ffe7f1; }
+    .patch.golden .weed-name { color: #986413; background: #fff0b0; }
+
+    .yard-caption {
+      position: relative; z-index: 3;
+      margin: 12px 0 0;
+      text-align: center; color: #f4ffe4;
+      text-shadow: 0 2px 3px #276434;
+      font-weight: 800; font-size: .86rem;
+    }
+
+    .game-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 10px; margin-top: 13px; color: #3c6b3b; font-weight: 800; font-size: .82rem;
+    }
+    .legend { display: flex; gap: 10px; flex-wrap: wrap; }
+    .legend span { white-space: nowrap; }
+    .quit-button {
+      border: 0; background: #fff9e9; color: #547348;
+      border-radius: 12px; padding: 9px 13px; font-weight: 900;
+      cursor: pointer; box-shadow: 0 3px 0 #447f4c38;
+    }
+
+    /* Results */
+    .result-emoji { font-size: 58px; line-height: 1; margin: 2px 0 8px; }
+    .result-score {
+      color: #2b713c; font-size: clamp(3rem, 13vw, 5.4rem);
+      font-weight: 1000; line-height: 1; letter-spacing: -.06em;
+      font-variant-numeric: tabular-nums;
+    }
+    .result-caption { color: #778369; font-weight: 800; margin: 6px 0 20px; }
+    .result-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; max-width: 440px; margin: 0 auto 22px;
+    }
+    .result-stat {
+      background: #f0f7df; border-radius: 16px; padding: 13px;
+      color: #6b7b5d; font-size: .78rem; font-weight: 800;
+    }
+    .result-stat strong { display: block; color: #345f39; font-size: 1.12rem; margin-top: 4px; }
+    .new-best { color: #bb761d; font-weight: 1000; margin: 0 0 18px; }
+
+    .toast {
+      position: fixed; z-index: 20; left: 50%; top: 15%;
+      transform: translate(-50%, -12px);
+      padding: 10px 16px; border-radius: 30px;
+      color: #fff; background: #355a3b; box-shadow: 0 4px 15px #1d382d55;
+      font-weight: 1000; opacity: 0; pointer-events: none;
+      transition: .18s ease; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .float-score {
+      position: fixed; z-index: 10; pointer-events: none;
+      color: #fff9a6; font-weight: 1000; font-size: 1.35rem;
+      text-shadow: 0 2px 3px #2c5d32; animation: floatUp .75s ease-out forwards;
+    }
+    .float-score.bad { color: #ffd1de; }
+    @keyframes floatUp { to { opacity: 0; transform: translateY(-58px) scale(1.2); } }
+
+    .particle {
+      position: fixed; z-index: 9; width: 9px; height: 9px;
+      border-radius: 50%; pointer-events: none;
+      animation: burst .55s ease-out forwards;
+    }
+    @keyframes burst {
+      to { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.15) rotate(150deg); }
+    }
+
+    .shake { animation: shake .24s linear; }
+    @keyframes shake {
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    @media (max-width: 540px) {
+      .game-shell { padding: 12px 12px 18px; }
+      .topbar { margin-bottom: 8px; }
+      .brand { font-size: .72rem; }
+      .brand-mark { width: 34px; height: 34px; }
+      .hud { gap: 6px; }
+      .hud-box { padding: 9px 5px; border-radius: 14px; }
+      .patch-grid { margin-top: 44px; gap: 8px; }
+      .dirt { border-width: 4px; }
+      .yard { padding: 12px 8px 19px; }
+      .yard::before { top: 16%; }
+      .game-footer { font-size: .72rem; }
+      .legend { gap: 5px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-shell">
+    <div class="sky-decoration" aria-hidden="true">
+      <div class="sun"></div><div class="cloud"></div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">🌱</span> Backyard Battle League</div>
+      <button class="icon-button" id="sound-toggle" type="button" aria-label="Mute sound">🔊 Sound</button>
+    </header>
+
+    <section class="screen" id="home-screen" aria-labelledby="game-title">
+      <div class="card">
+        <span class="eyebrow">🌿 The garden needs you</span>
+        <h1 id="game-title">Weed Whacker:<br><span>The Lawn Wars</span></h1>
+        <p class="subtitle">Your lawn isn’t going to weed itself.</p>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-fence"></div><div class="hero-grass"></div>
+          <span class="hero-weed">🌼</span>
+          <span class="hero-flower one">🌸</span><span class="hero-flower two">🌼</span>
+        </div>
+        <div class="best-badge">🏆 Personal best <span id="home-best">0</span></div><br>
+        <button class="primary-button" id="start-button" type="button">Start Game <span aria-hidden="true">→</span></button>
+        <p class="how-to">Tap the weeds before they disappear. Pull fast to build a streak, but watch out for poison ivy. You’ve got 60 seconds to save the yard!</p>
+      </div>
+    </section>
+
+    <section class="screen" id="game-screen" aria-label="Game in progress" hidden>
+      <div class="hud" aria-live="polite">
+        <div class="hud-box"><span class="hud-label">Score</span><span class="hud-value" id="score">0</span></div>
+        <div class="hud-box timer"><span class="hud-label">Time left</span><span class="hud-value" id="timer">60</span></div>
+        <div class="hud-box streak"><span class="hud-label">Streak</span><span class="hud-value" id="streak">0 🔥</span></div>
+      </div>
+      <div class="yard">
+        <div class="yard-details" aria-hidden="true">
+          <span class="d1">🌷</span><span class="d2">🪴</span><span class="d3">🌼</span><span class="d4">🦋</span>
+        </div>
+        <div class="patch-grid" id="patch-grid" aria-label="Nine lawn patches"></div>
+        <p class="yard-caption">The backyard is under attack. Get pulling!</p>
+      </div>
+      <div class="game-footer">
+        <div class="legend"><span>🌿 Pull weeds</span><span>☠️ Avoid ivy</span><span>✨ Bonus!</span></div>
+        <button class="quit-button" id="quit-button" type="button">End game</button>
+      </div>
+    </section>
+
+    <section class="screen" id="results-screen" aria-labelledby="results-title" hidden>
+      <div class="card">
+        <div class="result-emoji" id="result-emoji" aria-hidden="true">🌻</div>
+        <span class="eyebrow" id="results-title">Yard report</span>
+        <h2 class="result-score" id="final-score">0</h2>
+        <p class="result-caption">points earned</p>
+        <p class="new-best" id="new-best" hidden>🏆 New personal best! The neighbors are jealous.</p>
+        <div class="result-stats">
+          <div class="result-stat">Weeds pulled<strong id="total-pulled">0</strong></div>
+          <div class="result-stat">Top target<strong id="most-pulled">—</strong></div>
+          <div class="result-stat">Best streak<strong id="best-streak">0 🔥</strong></div>
+          <div class="result-stat">Ivy encounters<strong id="ivy-count">0</strong></div>
+        </div>
+        <button class="primary-button" id="play-again-button" type="button">Play Again <span aria-hidden="true">↻</span></button>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const ROUND_SECONDS = 60;
+      const STORAGE_KEY = "weedWhackerBest_v1";
+      const screens = {
+        home: document.getElementById("home-screen"),
+        game: document.getElementById("game-screen"),
+        results: document.getElementById("results-screen")
+      };
+
+      const weeds = {
+        chickweed: { name: "Chickweed", points: 10, life: 1550, color: "#77c844", weight: 28 },
+        clover: { name: "Clover", points: 15, life: 1450, color: "#74c747", weight: 22 },
+        dandelion: { name: "Dandelion", points: 20, life: 1350, color: "#ffd43b", weight: 18 },
+        crabgrass: { name: "Crabgrass", points: 25, life: 1250, color: "#65a944", weight: 15 },
+        poison: { name: "Poison Ivy", points: -20, life: 1500, color: "#bd5794", weight: 13 },
+        golden: { name: "Golden Weed", points: 50, life: 1150, color: "#ffcb35", weight: 4 }
+      };
+
+      const game = {
+        running: false, score: 0, streak: 0, bestStreak: 0,
+        seconds: ROUND_SECONDS, totalPulled: 0, ivy: 0,
+        counts: Object.create(null), sound: true,
+        spawnTimer: null, clockTimer: null, toastTimer: null,
+        lastPatch: -1, audio: null
+      };
+
+      const $ = id => document.getElementById(id);
+      const grid = $("patch-grid");
+      const patchEls = [];
+
+      function readBest() {
+        try { return Math.max(0, Number(localStorage.getItem(STORAGE_KEY)) || 0); }
+        catch (_) { return 0; }
+      }
+
+      function showScreen(name) {
+        Object.entries(screens).forEach(([key, element]) => {
+          element.hidden = key !== name;
+        });
+      }
+
+      function makePatches() {
+        for (let i = 0; i < 9; i++) {
+          const patch = document.createElement("button");
+          patch.type = "button";
+          patch.className = "patch";
+          patch.setAttribute("aria-label", `Lawn patch ${i + 1}, empty`);
+          patch.innerHTML = '<span class="dirt" aria-hidden="true"></span><span class="weed-slot" aria-hidden="true"></span><span class="weed-name"></span>';
+          patch.addEventListener("pointerdown", event => {
+            if (event.button !== undefined && event.button !== 0) return;
+            hitPatch(i, event);
+          });
+          grid.appendChild(patch);
+          patchEls.push(patch);
+        }
+      }
+
+      function weedSvg(type) {
+        const commonStart = '<svg viewBox="0 0 100 120" role="img" aria-hidden="true">';
+        const stem = '<path d="M50 112 Q48 80 50 42" stroke="#34783d" stroke-width="8" fill="none" stroke-linecap="round"/>';
+        const leaf = '<path d="M50 85 Q22 77 19 56 Q43 54 51 75 Q61 48 81 47 Q80 73 52 85" fill="#58ad45" stroke="#34783d" stroke-width="3" stroke-linejoin="round"/>';
+        const eyes = '<g fill="#203c2c"><ellipse cx="44" cy="49" rx="2.8" ry="4"/><ellipse cx="57" cy="49" rx="2.8" ry="4"/></g><path d="M45 58 Q50 62 56 57" fill="none" stroke="#203c2c" stroke-width="2.5" stroke-linecap="round"/>';
+
+        if (type === "chickweed") {
+          return commonStart + stem + leaf +
+            '<path d="M50 48 Q37 34 31 24 M50 48 Q64 34 69 22 M50 48 Q48 25 50 14" stroke="#4d9f41" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+            '<g fill="#fffdf1" stroke="#f3d9b2" stroke-width="1"><circle cx="31" cy="21" r="8"/><circle cx="69" cy="19" r="8"/><circle cx="50" cy="12" r="8"/></g>' +
+            '<g fill="#f3ce4a"><circle cx="31" cy="21" r="3"/><circle cx="69" cy="19" r="3"/><circle cx="50" cy="12" r="3"/></g>' +
+            '<g>' + eyes + '</g></svg>';
+        }
+        if (type === "clover") {
+          return commonStart + stem + leaf +
+            '<path d="M50 57 C34 46 35 33 46 32 C51 32 53 37 53 40 C59 29 73 32 72 42 C71 51 61 54 50 57Z" fill="#67bb4d" stroke="#34783d" stroke-width="3"/>' +
+            '<path d="M50 57 Q48 48 48 42" stroke="#34783d" stroke-width="2" fill="none"/>' + eyes + '</svg>';
+        }
+        if (type === "dandelion" || type === "golden") {
+          const gold = type === "golden";
+          const flower = gold ? "#ffbd25" : "#ffd83e";
+          let petals = "";
+          for (let i = 0; i < 12; i++) {
+            petals += `<ellipse cx="50" cy="26" rx="6" ry="14" fill="${flower}" stroke="${gold ? "#d58b19" : "#e5aa21"}" stroke-width="1.5" transform="rotate(${i * 30} 50 38)"/>`;
+          }
+          return commonStart + stem + leaf + petals +
+            `<circle cx="50" cy="38" r="10" fill="${gold ? "#9b5b1d" : "#9c6d22"}"/>` +
+            (gold ? '<path d="M34 22 L37 8 L44 18 M62 18 L70 7 L68 25" fill="#ffe38b" stroke="#d58b19" stroke-width="3" stroke-linejoin="round"/>' : "") +
+            '<g fill="#fff"><circle cx="46" cy="36" r="2"/><circle cx="54" cy="36" r="2"/></g>' +
+            '<path d="M46 43 Q50 46 54 42" fill="none" stroke="#402c1b" stroke-width="2" stroke-linecap="round"/></svg>';
+        }
+        if (type === "crabgrass") {
+          return commonStart +
+            '<path d="M50 112 Q49 77 50 70 M48 110 Q31 72 17 42 M51 107 Q68 72 84 39 M49 91 Q27 67 22 58 M51 87 Q69 62 77 54" stroke="#3d863b" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+            '<path d="M18 45 Q8 38 12 27 Q26 28 23 43 M83 42 Q94 32 91 23 Q77 25 79 42 M22 61 Q10 55 11 47 Q23 47 28 59 M78 57 Q91 50 89 42 Q77 44 72 57" fill="#6db64b" stroke="#34783d" stroke-width="3"/>' +
+            '<g fill="#203c2c"><circle cx="45" cy="72" r="3"/><circle cx="56" cy="72" r="3"/></g><path d="M45 80 Q50 84 56 79" fill="none" stroke="#203c2c" stroke-width="2.5" stroke-linecap="round"/></svg>';
+        }
+        // Poison ivy: distinctive purple leaves, warning spots and a worried face.
+        return commonStart + stem +
+          '<path d="M50 91 Q30 81 25 61 M50 91 Q70 81 76 61 M50 78 Q49 57 50 39" stroke="#5b7441" stroke-width="6" fill="none" stroke-linecap="round"/>' +
+          '<path d="M25 62 C6 57 15 34 29 39 C30 20 52 28 48 45 C64 29 78 46 62 58 C56 65 39 68 25 62Z" fill="#9d5790" stroke="#653e78" stroke-width="3"/>' +
+          '<path d="M76 62 C96 57 86 34 72 39 C71 20 49 28 53 45 C37 29 23 46 39 58 C45 65 62 68 76 62Z" fill="#bd6ca2" stroke="#653e78" stroke-width="3"/>' +
+          '<g fill="#f8d8ec"><circle cx="41" cy="49" r="3.3"/><circle cx="59" cy="49" r="3.3"/></g>' +
+          '<g fill="#402b3c"><circle cx="42" cy="49" r="1.5"/><circle cx="58" cy="49" r="1.5"/></g>' +
+          '<path d="M44 60 Q50 55 56 60" fill="none" stroke="#482c43" stroke-width="2.5" stroke-linecap="round"/>' +
+          '<circle cx="28" cy="54" r="3" fill="#ffc9d9"/><circle cx="72" cy="54" r="3" fill="#ffc9d9"/></svg>';
+      }
+
+      function weightedWeed() {
+        // Golden weeds are deliberately rare; poison ivy is common enough to stay alert.
+        const total = Object.values(weeds).reduce((sum, weed) => sum + weed.weight, 0);
+        let pick = Math.random() * total;
+        for (const [key, weed] of Object.entries(weeds)) {
+          pick -= weed.weight;
+          if (pick < 0) return key;
+        }
+        return "chickweed";
+      }
+
+      function choosePatch() {
+        const empty = patchEls.map((_, i) => i).filter(i => !patchEls[i].dataset.weed);
+        if (!empty.length) return -1;
+        const alternatives = empty.filter(i => i !== game.lastPatch);
+        const pool = alternatives.length ? alternatives : empty;
+        const choice = pool[Math.floor(Math.random() * pool.length)];
+        game.lastPatch = choice;
+        return choice;
+      }
+
+      function playSound(kind) {
+        if (!game.sound) return;
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return;
+          game.audio = game.audio || new AudioContext();
+          if (game.audio.state === "suspended") game.audio.resume();
+          const ctx = game.audio;
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          if (kind === "pop") {
+            osc.type = "sine"; osc.frequency.setValueAtTime(360, now);
+            osc.frequency.exponentialRampToValueAtTime(570, now + .07);
+            gain.gain.setValueAtTime(.035, now); gain.gain.exponentialRampToValueAtTime(.001, now + .09);
+            osc.start(now); osc.stop(now + .1);
+          } else if (kind === "bad") {
+            osc.type = "triangle"; osc.frequency.setValueAtTime(230, now);
+            osc.frequency.exponentialRampToValueAtTime(110, now + .16);
+            gain.gain.setValueAtTime(.06, now); gain.gain.exponentialRampToValueAtTime(.001, now + .18);
+            osc.start(now); osc.stop(now + .19);
+          } else {
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(kind === "gold" ? 740 : 520, now);
+            osc.frequency.exponentialRampToValueAtTime(kind === "gold" ? 1150 : 780, now + .09);
+            gain.gain.setValueAtTime(.07, now); gain.gain.exponentialRampToValueAtTime(.001, now + .22);
+            osc.start(now); osc.stop(now + .23);
+          }
+        } catch (_) { /* Audio is an optional enhancement. */ }
+      }
+
+      function showToast(message) {
+        const toast = $("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(game.toastTimer);
+        game.toastTimer = setTimeout(() => toast.classList.remove("show"), 900);
+      }
+
+      function showFloatingText(x, y, text, bad = false) {
+        const label = document.createElement("div");
+        label.className = "float-score" + (bad ? " bad" : "");
+        label.textContent = text;
+        label.style.left = `${x}px`;
+        label.style.top = `${y}px`;
+        document.body.appendChild(label);
+        setTimeout(() => label.remove(), 800);
+      }
+
+      function burst(x, y, color) {
+        const colors = [color, "#fff5ac", "#ffffff", "#ffae6a", "#8cdf68"];
+        for (let i = 0; i < 8; i++) {
+          const particle = document.createElement("span");
+          particle.className = "particle";
+          particle.style.left = `${x}px`;
+          particle.style.top = `${y}px`;
+          particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+          particle.style.setProperty("--dx", `${(Math.random() - .5) * 90}px`);
+          particle.style.setProperty("--dy", `${(Math.random() - .65) * 85}px`);
+          document.body.appendChild(particle);
+          setTimeout(() => particle.remove(), 650);
+        }
+      }
+
+      function spawn() {
+        if (!game.running || game.seconds <= 0) return;
+        const index = choosePatch();
+        if (index < 0) return;
+
+        const type = weightedWeed();
+        const patch = patchEls[index];
+        const config = weeds[type];
+        patch.dataset.weed = type;
+        patch.classList.remove("pulling");
+        patch.classList.toggle("poison", type === "poison");
+        patch.classList.toggle("golden", type === "golden");
+        patch.querySelector(".weed-slot").innerHTML = `<span class="weed">${weedSvg(type)}</span>`;
+        patch.querySelector(".weed-name").textContent = type === "golden" ? "✨ GOLDEN +50" : `${config.name} ${config.points > 0 ? "+" + config.points : ""}`;
+        patch.setAttribute("aria-label", `${config.name}, ${config.points > 0 ? config.points + " points" : "minus 20 points"}`);
+        // The lifetime shortens as the round gets harder, but remains reactable.
+        const progress = 1 - game.seconds / ROUND_SECONDS;
+        const life = Math.max(760, config.life - progress * 430);
+        patch.classList.add("active");
+        playSound("pop");
+
+        patch._weedTimeout = setTimeout(() => {
+          if (patch.dataset.weed !== type) return;
+          clearPatch(patch);
+          // A missed weed breaks the current combo.
+          game.streak = 0;
+          updateHud();
+        }, life);
+
+        scheduleNextSpawn();
+      }
+
+      function clearPatch(patch) {
+        clearTimeout(patch._weedTimeout);
+        patch.classList.remove("active", "poison", "golden", "pulling");
+        delete patch.dataset.weed;
+        patch.querySelector(".weed-slot").innerHTML = "";
+        patch.querySelector(".weed-name").textContent = "";
+        patch.setAttribute("aria-label", `Lawn patch ${patchEls.indexOf(patch) + 1}, empty`);
+      }
+
+      function scheduleNextSpawn() {
+        clearTimeout(game.spawnTimer);
+        if (!game.running) return;
+        const progress = 1 - game.seconds / ROUND_SECONDS;
+        const delay = Math.max(360, 960 - progress * 450) + Math.random() * 260;
+        game.spawnTimer = setTimeout(spawn, delay);
+      }
+
+      function hitPatch(index, event) {
+        if (!game.running) return;
+        const patch = patchEls[index];
+        const type = patch.dataset.weed;
+        if (!type) return; // Empty lawn clicks never score.
+        const config = weeds[type];
+        const rect = patch.getBoundingClientRect();
+        const x = event.clientX || rect.left + rect.width / 2;
+        const y = event.clientY || rect.top + rect.height / 2;
+
+        clearTimeout(patch._weedTimeout);
+        patch.classList.add("pulling");
+        game.score = Math.max(0, game.score + config.points);
+
+        if (type === "poison") {
+          game.ivy++;
+          game.streak = 0;
+          playSound("bad");
+          showFloatingText(x, y, "−20! IVY!", true);
+          showToast("Ouch! Poison ivy! −20");
+          document.querySelector(".yard").classList.remove("shake");
+          void document.querySelector(".yard").offsetWidth;
+          document.querySelector(".yard").classList.add("shake");
+        } else {
+          game.totalPulled++;
+          game.counts[type] = (game.counts[type] || 0) + 1;
+          game.streak++;
+          game.bestStreak = Math.max(game.bestStreak, game.streak);
+          const bonus = game.streak > 0 && game.streak % 5 === 0 ? 10 : 0;
+          game.score += bonus;
+          playSound(type === "golden" ? "gold" : "pull");
+          showFloatingText(x, y, `+${config.points}${bonus ? " +10 STREAK!" : ""}`);
+          burst(x, y, config.color);
+          if (bonus) showToast("5-pull streak! Bonus +10 🌟");
+        }
+
+        updateHud();
+        setTimeout(() => {
+          if (patch.dataset.weed === type) clearPatch(patch);
+        }, 210);
+      }
+
+      function updateHud() {
+        $("score").textContent = game.score;
+        $("timer").textContent = game.seconds;
+        $("streak").textContent = `${game.streak} 🔥`;
+      }
+
+      function startGame() {
+        clearTimeout(game.spawnTimer);
+        clearInterval(game.clockTimer);
+        patchEls.forEach(clearPatch);
+        game.running = true;
+        game.score = 0;
+        game.streak = 0;
+        game.bestStreak = 0;
+        game.seconds = ROUND_SECONDS;
+        game.totalPulled = 0;
+        game.ivy = 0;
+        game.counts = Object.create(null);
+        game.lastPatch = -1;
+        updateHud();
+        showScreen("game");
+        // A user gesture starts/resumes audio on browsers that require it.
+        if (game.sound && game.audio && game.audio.state === "suspended") game.audio.resume();
+        spawn();
+        game.clockTimer = setInterval(() => {
+          if (!game.running) return;
+          game.seconds--;
+          updateHud();
+          if (game.seconds <= 0) endGame();
+        }, 1000);
+      }
+
+      function endGame() {
+        if (!game.running) return;
+        game.running = false;
+        clearTimeout(game.spawnTimer);
+        clearInterval(game.clockTimer);
+        patchEls.forEach(clearPatch);
+
+        const previousBest = readBest();
+        const isNewBest = game.score > previousBest;
+        if (isNewBest) {
+          try { localStorage.setItem(STORAGE_KEY, String(game.score)); } catch (_) {}
+        }
+
+        const topEntry = Object.entries(game.counts).sort((a, b) => b[1] - a[1])[0];
+        $("final-score").textContent = game.score;
+        $("total-pulled").textContent = game.totalPulled;
+        $("most-pulled").textContent = topEntry ? `${weeds[topEntry[0]].name} (${topEntry[1]})` : "None yet!";
+        $("best-streak").textContent = `${game.bestStreak} 🔥`;
+        $("ivy-count").textContent = game.ivy;
+        $("new-best").hidden = !isNewBest;
+        $("result-emoji").textContent = isNewBest && game.score > 250 ? "🏆" : game.score > 180 ? "🌻" : "🧤";
+        showScreen("results");
+        if (isNewBest && game.score > 0) {
+          for (let i = 0; i < 3; i++) {
+            setTimeout(() => burst(window.innerWidth / 2 + (Math.random() - .5) * 130, 120 + Math.random() * 100, "#ffd449"), i * 180);
+          }
+        }
+      }
+
+      $("start-button").addEventListener("click", startGame);
+      $("play-again-button").addEventListener("click", startGame);
+      $("quit-button").addEventListener("click", endGame);
+      $("sound-toggle").addEventListener("click", () => {
+        game.sound = !game.sound;
+        $("sound-toggle").textContent = game.sound ? "🔊 Sound" : "🔇 Muted";
+        $("sound-toggle").setAttribute("aria-label", game.sound ? "Mute sound" : "Enable sound");
+        if (game.sound) playSound("pop");
+      });
+
+      makePatches();
+      $("home-best").textContent = readBest();
+      showScreen("home");
+    })();
+  </script>
+</body>
+</html>
